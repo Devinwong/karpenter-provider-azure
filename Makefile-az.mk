@@ -39,6 +39,8 @@ az-mkaks: az-mkacr ## Create test AKS cluster (with --vm-set-type AvailabilitySe
 	skaffold config set default-repo $(AZURE_ACR_NAME).azurecr.io/karpenter
 
 az-mkaks-cilium-nap:
+	az extension add --name aks-preview
+	az feature register --namespace "Microsoft.ContainerService" --name "NodeAutoProvisioningPreview"
 	az aks create          --name $(AZURE_CLUSTER_NAME) --resource-group $(AZURE_RESOURCE_GROUP)  \
 		--enable-managed-identity --node-count 3 --generate-ssh-keys -o none --network-dataplane cilium --network-plugin azure --network-plugin-mode overlay \
 		--enable-oidc-issuer --enable-managed-identity --node-provisioning-mode Auto

@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	nbcontractv1 "github.com/Azure/agentbaker/pkg/proto/nbcontract/v1"
-	"k8s.io/utils/ptr"
+	"github.com/Azure/go-autorest/autorest/to"
 )
 
 func Test_getSysctlContent(t *testing.T) {
@@ -55,9 +55,9 @@ net.ipv4.tcp_retries2=8`)),
 			name: "SysctlConfig with custom values",
 			args: args{
 				s: &nbcontractv1.SysctlConfig{
-					NetIpv4TcpMaxSynBacklog: ptr.To(int32(9999)),
-					NetCoreRmemDefault:      ptr.To(int32(9999)),
-					NetIpv4IpLocalPortRange: ptr.To("32768 62535"),
+					NetIpv4TcpMaxSynBacklog: to.Int32Ptr(int32(9999)),
+					NetCoreRmemDefault:      to.Int32Ptr(int32(9999)),
+					NetIpv4IpLocalPortRange: to.StringPtr("32768 62535"),
 				},
 			},
 			want: base64.StdEncoding.EncodeToString(
@@ -116,50 +116,6 @@ func Test_getUlimitContent(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := getUlimitContent(tt.args.u); got != tt.want {
 				t.Errorf("getUlimitContent() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_getKubeletConfigFileEnabled(t *testing.T) {
-	type args struct {
-		configContent string
-		k8sVersion    string
-	}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{
-			name: "Kubelet config file enabled",
-			args: args{
-				configContent: "some config content",
-				k8sVersion:    "1.20.0",
-			},
-			want: true,
-		},
-		{
-			name: "Kubelet config file disabled",
-			args: args{
-				configContent: "",
-				k8sVersion:    "1.20.0",
-			},
-			want: false,
-		},
-		{
-			name: "Kubelet config file disabled for k8s version < 1.14.0",
-			args: args{
-				configContent: "some config content",
-				k8sVersion:    "1.13.5",
-			},
-			want: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := getKubeletConfigFileEnabled(tt.args.configContent, tt.args.k8sVersion); got != tt.want {
-				t.Errorf("getKubeletConfigFileEnabled() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -306,13 +262,13 @@ func Test_getContainerdConfig(t *testing.T) {
 			name: "Default Configuration",
 			args: args{
 				nbcontract: &nbcontractv1.Configuration{
-					NeedsCgroupv2: ptr.To(true),
+					NeedsCgroupv2: to.BoolPtr(true),
 				},
 			},
 			want: base64.StdEncoding.EncodeToString([]byte(`version = 2
 oom_score = 0
 [plugins."io.containerd.grpc.v1.cri"]
-  sandbox_image = "mcr.microsoft.com/oss/kubernetes/pause:3.6"
+  sandbox_image = ""
   [plugins."io.containerd.grpc.v1.cri".containerd]
     default_runtime_name = "runc"
     [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
@@ -324,8 +280,6 @@ oom_score = 0
       runtime_type = "io.containerd.runc.v2"
     [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.untrusted.options]
       BinaryName = "/usr/bin/runc"
-  [plugins."io.containerd.grpc.v1.cri".registry]
-    config_path = "/etc/containerd/certs.d"
   [plugins."io.containerd.grpc.v1.cri".registry.headers]
     X-Meta-Source-Client = ["azure/aks"]
 [metrics]
@@ -387,7 +341,7 @@ func Test_getKubenetTemplate(t *testing.T) {
 
 func Test_getAzureEnvironmentFilepath(t *testing.T) {
 	type args struct {
-		v *nbcontractv1.CustomCloudConfig
+		v *nbcontractv1.Configuration
 	}
 	tests := []struct {
 		name string
@@ -397,26 +351,29 @@ func Test_getAzureEnvironmentFilepath(t *testing.T) {
 		{
 			name: "Nil CustomCloudConfig",
 			args: args{
-				v: nil,
+				v: &nbcontractv1.Configuration{},
 			},
 			want: "",
 		},
 		{
 			name: "Empty AzureEnvironmentFilepath",
 			args: args{
-				v: &nbcontractv1.CustomCloudConfig{},
+				v: &nbcontractv1.Configuration{
+					CustomCloudConfig: &nbcontractv1.CustomCloudConfig{},
+				},
 			},
 			want: "",
 		},
 		{
 			name: "AzureEnvironmentFilepath when it is AKSCustomCloud",
 			args: args{
-				v: &nbcontractv1.CustomCloudConfig{
-					IsAksCustomCloud:  true,
-					TargetEnvironment: "testcloud",
+				v: &nbcontractv1.Configuration{
+					CustomCloudConfig: &nbcontractv1.CustomCloudConfig{
+						CustomCloudEnvName: AksCustomCloudName,
+					},
 				},
 			},
-			want: "/etc/kubernetes/testcloud.json",
+			want: "/etc/kubernetes/akscustom.json",
 		},
 	}
 	for _, tt := range tests {
@@ -889,7 +846,7 @@ func Test_getShouldConfigureHTTPProxyCA(t *testing.T) {
 
 func Test_getTargetEnvironment(t *testing.T) {
 	type args struct {
-		v *nbcontractv1.CustomCloudConfig
+		v *nbcontractv1.Configuration
 	}
 	tests := []struct {
 		name string
@@ -904,15 +861,17 @@ func Test_getTargetEnvironment(t *testing.T) {
 		{
 			name: "Empty CustomCloudConfig",
 			args: args{
-				v: &nbcontractv1.CustomCloudConfig{},
+				v: &nbcontractv1.Configuration{
+					CustomCloudConfig: &nbcontractv1.CustomCloudConfig{},
+				},
 			},
 			want: defaultCloudName,
 		},
 		{
 			name: "CustomCloudConfig with empty TargetEnvironment",
 			args: args{
-				v: &nbcontractv1.CustomCloudConfig{
-					TargetEnvironment: "",
+				v: &nbcontractv1.Configuration{
+					CustomCloudConfig: &nbcontractv1.CustomCloudConfig{},
 				},
 			},
 			want: defaultCloudName,
@@ -920,11 +879,13 @@ func Test_getTargetEnvironment(t *testing.T) {
 		{
 			name: "CustomCloudConfig with TargetEnvironment",
 			args: args{
-				v: &nbcontractv1.CustomCloudConfig{
-					TargetEnvironment: "testcloud",
+				v: &nbcontractv1.Configuration{
+					CustomCloudConfig: &nbcontractv1.CustomCloudConfig{
+						CustomCloudEnvName: AksCustomCloudName,
+					},
 				},
 			},
-			want: "testcloud",
+			want: AksCustomCloudName,
 		},
 	}
 	for _, tt := range tests {
@@ -938,7 +899,7 @@ func Test_getTargetEnvironment(t *testing.T) {
 
 func Test_getTargetCloud(t *testing.T) {
 	type args struct {
-		v *nbcontractv1.AuthConfig
+		v *nbcontractv1.Configuration
 	}
 	tests := []struct {
 		name string
@@ -946,34 +907,29 @@ func Test_getTargetCloud(t *testing.T) {
 		want string
 	}{
 		{
-			name: "Nil AuthConfig",
+			name: "Nil CustomCloudConfig",
 			args: args{},
 			want: defaultCloudName,
 		},
 		{
-			name: "Empty AuthConfig",
+			name: "Empty CustomCloudConfig",
 			args: args{
-				v: &nbcontractv1.AuthConfig{},
-			},
-			want: defaultCloudName,
-		},
-		{
-			name: "AuthConfig with empty TargetCloud",
-			args: args{
-				v: &nbcontractv1.AuthConfig{
-					TargetCloud: "",
+				v: &nbcontractv1.Configuration{
+					CustomCloudConfig: &nbcontractv1.CustomCloudConfig{},
 				},
 			},
 			want: defaultCloudName,
 		},
 		{
-			name: "AuthConfig with TargetEnvironment",
+			name: "CustomCloudConfig with TargetEnvironment",
 			args: args{
-				v: &nbcontractv1.AuthConfig{
-					TargetCloud: "testcloud",
+				v: &nbcontractv1.Configuration{
+					CustomCloudConfig: &nbcontractv1.CustomCloudConfig{
+						CustomCloudEnvName: AksCustomCloudName,
+					},
 				},
 			},
-			want: "testcloud",
+			want: AzureStackCloud,
 		},
 	}
 	for _, tt := range tests {

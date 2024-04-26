@@ -167,7 +167,6 @@ var (
 			ConfigGpuDriver: true,  // s
 			GpuDevicePlugin: false, // -
 		},
-		EnableSsh:       true,                        // td
 		OutboundCommand: GetDefaultOutboundCommand(), // s
 		TlsBootstrappingConfig: &nbcontractv1.TLSBootstrappingConfig{
 			EnableSecureTlsBootstrapping: to.BoolPtr(false),

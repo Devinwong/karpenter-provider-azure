@@ -29,11 +29,13 @@ const (
 	initAKSCustomCloudFilepath           = "/opt/azure/containers/init-aks-custom-cloud.sh"
 )
 
+const numInPair = 2
+
 const (
 	vmTypeStandard       = "standard"
 	vmTypeVmss           = "vmss"
 	networkPluginAzure   = "azure"
-	networkPluginkubenet = "kubenet"
+	NetworkPluginKubenet = "kubenet"
 	networkPolicyAzure   = "azure"
 	networkPolicyCalico  = "calico"
 	loadBalancerBasic    = "basic"
@@ -42,4 +44,6 @@ const (
 	vmSizeStandardDc4s   = "Standard_DC4s"
 	defaultLinuxUser     = "azureuser"
 	defaultCloudName     = "AzurePublicCloud"
+	AksCustomCloudName   = "akscustom"
+	AzureStackCloud      = "AzureStackCloud"
 )

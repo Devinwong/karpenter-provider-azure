@@ -53,10 +53,10 @@ func getFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"derefString":                               deref[string],
 		"derefBool":                                 deref[bool],
-		"getStringFromVMType":                       getStringFromVMType,
-		"getStringFromNetworkPluginType":            getStringFromNetworkPluginType,
-		"getStringFromNetworkPolicyType":            getStringFromNetworkPolicyType,
-		"getStringFromLoadBalancerSkuType":          getStringFromLoadBalancerSkuType,
+		"getVMType":                                 getVMType,
+		"getNetworkPlugin":                          getNetworkPlugin,
+		"getNetworkPolicy":                          getNetworkPolicy,
+		"getLoadBalancerSKU":                        getLoadBalancerSKU,
 		"getKubenetTemplate":                        getKubenetTemplate,
 		"getSysctlContent":                          getSysctlContent,
 		"getUlimitContent":                          getUlimitContent,
@@ -106,45 +106,45 @@ func getFuncMapForContainerdConfigTemplate() template.FuncMap {
 	}
 }
 
-func getStringFromVMType(enum nbcontractv1.ClusterConfig_VM) string {
+func getVMType(enum nbcontractv1.ClusterConfig_VM) string {
 	switch enum {
 	case nbcontractv1.ClusterConfig_STANDARD:
-		return vmTypeStandard
+		return nbcontractv1.VMTypeStandard
 	case nbcontractv1.ClusterConfig_VMSS:
-		return vmTypeVmss
+		return nbcontractv1.VMTypeVMSS
 	default:
 		return ""
 	}
 }
 
-func getStringFromNetworkPluginType(enum nbcontractv1.NetworkPlugin) string {
+func getNetworkPlugin(enum nbcontractv1.NetworkPlugin) string {
 	switch enum {
 	case nbcontractv1.NetworkPlugin_NP_AZURE:
-		return networkPluginAzure
+		return nbcontractv1.NetworkPluginAzure
 	case nbcontractv1.NetworkPlugin_NP_KUBENET:
-		return networkPluginkubenet
+		return nbcontractv1.NetworkPluginkubenet
 	default:
 		return ""
 	}
 }
 
-func getStringFromNetworkPolicyType(enum nbcontractv1.NetworkPolicy) string {
+func getNetworkPolicy(enum nbcontractv1.NetworkPolicy) string {
 	switch enum {
 	case nbcontractv1.NetworkPolicy_NPO_AZURE:
-		return networkPolicyAzure
+		return nbcontractv1.NetworkPolicyAzure
 	case nbcontractv1.NetworkPolicy_NPO_CALICO:
-		return networkPolicyCalico
+		return nbcontractv1.NetworkPolicyCalico
 	default:
 		return ""
 	}
 }
 
-func getStringFromLoadBalancerSkuType(enum nbcontractv1.LoadBalancerConfig_LoadBalancerSku) string {
+func getLoadBalancerSKU(enum nbcontractv1.LoadBalancerConfig_LoadBalancerSku) string {
 	switch enum {
 	case nbcontractv1.LoadBalancerConfig_BASIC:
-		return loadBalancerBasic
+		return nbcontractv1.LoadBalancerBasic
 	case nbcontractv1.LoadBalancerConfig_STANDARD:
-		return loadBalancerStandard
+		return nbcontractv1.LoadBalancerStandard
 	default:
 		return ""
 	}
@@ -554,7 +554,7 @@ func getGpuDriverVersion(vmSize string) string {
 // IsSgxEnabledSKU determines if an VM SKU has SGX driver support.
 func getIsSgxEnabledSKU(vmSize string) bool {
 	switch vmSize {
-	case vmSizeStandardDc2s, vmSizeStandardDc4s:
+	case nbcontractv1.VMSizeStandardDc2s, nbcontractv1.VMSizeStandardDc4s:
 		return true
 	}
 	return false
@@ -577,14 +577,14 @@ func getAzureEnvironmentFilepath(v *nbcontractv1.CustomCloudConfig) string {
 
 func getLinuxAdminUsername(username string) string {
 	if username == "" {
-		return defaultLinuxUser
+		return nbcontractv1.DefaultLinuxUser
 	}
 	return username
 }
 
 func getTargetEnvironment(v *nbcontractv1.CustomCloudConfig) string {
 	if v.GetTargetEnvironment() == "" {
-		return defaultCloudName
+		return nbcontractv1.DefaultCloudName
 	}
 
 	return v.GetTargetEnvironment()
@@ -592,7 +592,7 @@ func getTargetEnvironment(v *nbcontractv1.CustomCloudConfig) string {
 
 func getTargetCloud(v *nbcontractv1.AuthConfig) string {
 	if v.GetTargetCloud() == "" {
-		return defaultCloudName
+		return nbcontractv1.DefaultCloudName
 	}
 
 	return v.GetTargetCloud()

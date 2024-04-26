@@ -154,10 +154,10 @@ var (
 			VmType:              nbcontractv1.ClusterConfig_VMSS, // xd
 			UseInstanceMetadata: true,                            // s
 			LoadBalancerConfig: &nbcontractv1.LoadBalancerConfig{
-				LoadBalancerSku:                       getLoadBalancerSKU("Standard"), // xd
-				ExcludeMasterFromStandardLoadBalancer: to.BoolPtr(true),               //s
-				MaxLoadBalancerRuleCount:              to.Int32Ptr(250),               // xd
-				DisableOutboundSnat:                   false,                          // s
+				LoadBalancerSku:                       nbcontractv1.GetLoadBalancerSKU("Standard"), // xd
+				ExcludeMasterFromStandardLoadBalancer: to.BoolPtr(true),                            //s
+				MaxLoadBalancerRuleCount:              to.Int32Ptr(250),                            // xd
+				DisableOutboundSnat:                   false,                                       // s
 			},
 			ClusterNetworkConfig: &nbcontractv1.ClusterNetworkConfig{
 				Subnet: "aks-subnet", // xd
@@ -167,8 +167,8 @@ var (
 			ConfigGpuDriver: true,  // s
 			GpuDevicePlugin: false, // -
 		},
-		EnableSsh:       true,                        // td
-		OutboundCommand: GetDefaultOutboundCommand(), // s
+		EnableSsh:       true,                                     // td
+		OutboundCommand: nbcontractv1.GetDefaultOutboundCommand(), // s
 		TlsBootstrappingConfig: &nbcontractv1.TLSBootstrappingConfig{
 			EnableSecureTlsBootstrapping: to.BoolPtr(false),
 		},
@@ -227,8 +227,8 @@ func (a AKS) applyOptions(v *nbcontractv1.Configuration) (*nbcontractv1.Configur
 	nBCB.GetNodeBootstrapConfig().AuthConfig.ServicePrincipalId = servicePrincipalClientID
 	nBCB.GetNodeBootstrapConfig().AuthConfig.ServicePrincipalSecret = servicePrincipalFileContent
 	nBCB.GetNodeBootstrapConfig().AuthConfig.AssignedIdentityId = a.UserAssignedIdentityID
-	nBCB.GetNodeBootstrapConfig().NetworkConfig.NetworkPlugin = getNetworkPluginType(a.NetworkPlugin)
-	nBCB.GetNodeBootstrapConfig().NetworkConfig.NetworkPolicy = getNetworkPolicyType(a.NetworkPolicy)
+	nBCB.GetNodeBootstrapConfig().NetworkConfig.NetworkPlugin = nbcontractv1.GetNetworkPluginType(a.NetworkPlugin)
+	nBCB.GetNodeBootstrapConfig().NetworkConfig.NetworkPolicy = nbcontractv1.GetNetworkPolicyType(a.NetworkPolicy)
 	nBCB.GetNodeBootstrapConfig().KubernetesVersion = a.KubernetesVersion
 
 	nBCB.GetNodeBootstrapConfig().KubeBinaryConfig.KubeBinaryUrl = kubeBinaryURL(a.KubernetesVersion, a.Arch)

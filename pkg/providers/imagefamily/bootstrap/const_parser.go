@@ -28,18 +28,3 @@ const (
 	dhcpV6ConfigCSEScriptFilepath        = "/opt/azure/containers/enable-dhcpv6.sh"
 	initAKSCustomCloudFilepath           = "/opt/azure/containers/init-aks-custom-cloud.sh"
 )
-
-const (
-	vmTypeStandard       = "standard"
-	vmTypeVmss           = "vmss"
-	networkPluginAzure   = "azure"
-	networkPluginkubenet = "kubenet"
-	networkPolicyAzure   = "azure"
-	networkPolicyCalico  = "calico"
-	loadBalancerBasic    = "basic"
-	loadBalancerStandard = "Standard"
-	vmSizeStandardDc2s   = "Standard_DC2s"
-	vmSizeStandardDc4s   = "Standard_DC4s"
-	defaultLinuxUser     = "azureuser"
-	defaultCloudName     = "AzurePublicCloud"
-)

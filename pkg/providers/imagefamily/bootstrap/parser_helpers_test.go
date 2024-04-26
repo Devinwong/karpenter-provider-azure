@@ -899,14 +899,14 @@ func Test_getTargetEnvironment(t *testing.T) {
 		{
 			name: "Nil CustomCloudConfig",
 			args: args{},
-			want: defaultCloudName,
+			want: nbcontractv1.DefaultCloudName,
 		},
 		{
 			name: "Empty CustomCloudConfig",
 			args: args{
 				v: &nbcontractv1.CustomCloudConfig{},
 			},
-			want: defaultCloudName,
+			want: nbcontractv1.DefaultCloudName,
 		},
 		{
 			name: "CustomCloudConfig with empty TargetEnvironment",
@@ -915,7 +915,7 @@ func Test_getTargetEnvironment(t *testing.T) {
 					TargetEnvironment: "",
 				},
 			},
-			want: defaultCloudName,
+			want: nbcontractv1.DefaultCloudName,
 		},
 		{
 			name: "CustomCloudConfig with TargetEnvironment",
@@ -948,14 +948,14 @@ func Test_getTargetCloud(t *testing.T) {
 		{
 			name: "Nil AuthConfig",
 			args: args{},
-			want: defaultCloudName,
+			want: nbcontractv1.DefaultCloudName,
 		},
 		{
 			name: "Empty AuthConfig",
 			args: args{
 				v: &nbcontractv1.AuthConfig{},
 			},
-			want: defaultCloudName,
+			want: nbcontractv1.DefaultCloudName,
 		},
 		{
 			name: "AuthConfig with empty TargetCloud",
@@ -964,7 +964,7 @@ func Test_getTargetCloud(t *testing.T) {
 					TargetCloud: "",
 				},
 			},
-			want: defaultCloudName,
+			want: nbcontractv1.DefaultCloudName,
 		},
 		{
 			name: "AuthConfig with TargetEnvironment",
@@ -999,7 +999,7 @@ func Test_getLinuxAdminUsername(t *testing.T) {
 			args: args{
 				username: "",
 			},
-			want: defaultLinuxUser,
+			want: nbcontractv1.DefaultLinuxUser,
 		},
 		{
 			name: "Non-empty username",
@@ -1042,9 +1042,9 @@ func Test_getIsSgxEnabledSKU(t *testing.T) {
 			want: false,
 		},
 		{
-			name: vmSizeStandardDc2s,
+			name: nbcontractv1.VMSizeStandardDc2s,
 			args: args{
-				vmSize: vmSizeStandardDc2s,
+				vmSize: nbcontractv1.VMSizeStandardDc2s,
 			},
 			want: true,
 		},
